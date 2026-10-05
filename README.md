@@ -44,8 +44,11 @@ longest shadow you model (`umbrage.tiling`), or cap shadow length with `max_dist
 
 ## Install and test
 
+The `umep` extra (solweig) needs Python 3.11 to 3.13; on a Mac with a newer system Python,
+`brew install python@3.12` and create the venv with `/opt/homebrew/bin/python3.12`.
+
 ```bash
-python -m venv .venv && source .venv/bin/activate
+python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e ".[torch,umep,dev]"
 pytest
 python benchmarks/bench_engines.py --size 4000    # seconds per km2 on this machine
