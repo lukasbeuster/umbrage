@@ -35,8 +35,9 @@ with transmissivity `tau`. Outputs: `building` (shaded by the dsm), `vegetation`
 intercepted by a crown, independent of buildings), `shade` = 1 / 1 - tau / 0.
 
 Differences from UMEP: SOLWEIG reports 1 = sunlit and its vegetation shadow excludes cells
-already in building shadow. Against `solweig` 0.1.0b96 on synthetic cities, building shade
-agrees on > 99.98% of cells and combined shade on ~99.8%.
+already in building shadow. Against `solweig` 0.1.0b96 on a synthetic estate over a full day
+(23 timesteps), building shade agrees on 99.93 to 100% of ground cells and combined shade on
+99.64 to 100%; see `benchmarks/results/2026-10-05_synthetic_estate/`.
 
 Edges: obstacles outside the array are invisible. Tile with a halo at least as long as the
 longest shadow you model (`umbrage.tiling`), or cap shadow length with `max_distance_m`.

@@ -101,12 +101,13 @@ def cast_shadows(dsm, res: float, azimuth: float, elevation: float,
             ct = cb = v = None
 
     tan_e = math.tan(math.radians(elevation))
-    max_px = (max(zmax - zmin, 0.0) / tan_e) / res
+    max_px = (max(zmax - zmin, 0.0) / tan_e) / res + 1.0   # +1: pixels have extent (see segment test)
     if max_distance_m is not None:
         max_px = min(max_px, max_distance_m / res)
 
     H, W = z_np.shape
     steps = 0
+    prev_px = 0.0
     for dr, dc, dist_px in sun_offsets(azimuth, max_px):
         if abs(dr) >= H or abs(dc) >= W:
             break
@@ -115,7 +116,12 @@ def cast_shadows(dsm, res: float, azimuth: float, elevation: float,
         ray = z[tr, tc] + dist_px * res * tan_e        # sun-ray height above each target cell
         b[tr, tc] |= z[sr, sc] > ray
         if use_veg:
-            v[tr, tc] |= (ct[sr, sc] > ray) & (cb[sr, sc] < ray)
+            # A crown pixel has extent: the ray crosses it between the previous and this step,
+            # so test the ray segment [ray_lo, ray] against the crown interval [base, top].
+            # Same idea as UMEP's current/previous-step flags; removes a one-pixel fringe.
+            ray_lo = z[tr, tc] + prev_px * res * tan_e
+            v[tr, tc] |= (ct[sr, sc] > ray_lo) & (cb[sr, sc] < ray)
+        prev_px = dist_px
         steps += 1
 
     if device is not None:
