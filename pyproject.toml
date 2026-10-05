@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "umbrage"
+version = "0.1.0.dev0"
+description = "Fast 2.5D shade from raster surface models, on CPU or GPU"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Lukas Beuster"}]
+requires-python = ">=3.11"
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+torch = ["torch"]                 # Apple MPS / CUDA / multi-threaded CPU
+umep = ["solweig"]                # UMEP Rust backend (GPL-3.0), optional, for cross-checks
+dev = ["pytest", "pvlib"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
