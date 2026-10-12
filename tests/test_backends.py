@@ -40,6 +40,24 @@ def test_matches_umep_rust_buildings():
         assert (a.building == b.building).mean() > 0.999
 
 
+def test_matches_umep_rust_vegetation():
+    """Combined runs: solweig's building shade must not change when canopy is passed, and its
+    vegetation-only shade (crown shade outside building shade; solweig does not mark vegetation
+    inside building shade) must match umbrage's. Terrain offset so 'no canopy' (0 m) lies below ground."""
+    pytest.importorskip("solweig")
+    from umbrage.backends.solweig_rs import cast_shadows as rs
+    z, ct, cb = synthetic_city()
+    z, ct, cb = z + 20.0, ct + 20.0, cb + 20.0
+    for az, el in [(100.0, 25.0), (200.0, 60.0), (300.0, 15.0)]:
+        a = cast_shadows(z, 1.0, az, el, ct, cb)
+        b = rs(z, 1.0, az, el, ct, cb, gpu=False)
+        b0 = rs(z, 1.0, az, el, gpu=False)
+        assert (b.building == b0.building).all()
+        va, vb = a.vegetation & ~a.building, b.vegetation & ~b.building
+        assert va.sum() > 1000
+        assert (va == vb).mean() > 0.995
+
+
 def test_tiles_cover_grid_once():
     seen = np.zeros((1050, 2300), int)
     for t in tiles(1050, 2300, 500, 100):
