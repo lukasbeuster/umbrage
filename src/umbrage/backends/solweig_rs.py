@@ -32,13 +32,17 @@ _HELD: dict[str, object] = {"arrays": (), "fingerprints": ()}
 
 
 def _fingerprint(a: np.ndarray | None) -> tuple | None:
-    """Cheap content fingerprint: float64 sums over every row and every column. An in-place
-    change of any pixel changes at least one of them (barring exact cancellation)."""
+    """Cheap content fingerprint: position-weighted float64 sums of the row sums and column sums.
+    An in-place change of any pixel changes them (barring exact cancellation). Element-wise
+    products, not a matrix product: on macOS numpy's matmul goes through Accelerate, which raises
+    spurious divide-by-zero / overflow / invalid warnings (2026-10-08 run: 2,000 per run)."""
     if a is None:
         return None
-    x = np.nan_to_num(a, nan=-1.0e9)
-    return (a.shape, float(x.sum(axis=1, dtype=np.float64) @ np.arange(1, a.shape[0] + 1)),
-            float(x.sum(axis=0, dtype=np.float64) @ np.arange(1, a.shape[1] + 1)))
+    x = np.nan_to_num(a.astype(np.float64, copy=False), nan=-1.0e9, posinf=1.0e12, neginf=-1.0e12)
+    rows = x.sum(axis=1)
+    cols = x.sum(axis=0)
+    return (a.shape, float((rows * np.arange(1, rows.size + 1)).sum()),
+            float((cols * np.arange(1, cols.size + 1)).sum()))
 
 
 def _stable_inputs(arrays: list[np.ndarray | None]) -> list[np.ndarray | None]:

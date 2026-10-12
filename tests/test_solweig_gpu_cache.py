@@ -88,3 +88,16 @@ def test_real_gpu_sequence_matches_cpu():
         g = solweig_rs.cast_shadows(z, 1.0, 110.0, 30.0, gpu=True).building
         c = solweig_rs.cast_shadows(z, 1.0, 110.0, 30.0, gpu=False).building
         assert (g == c).mean() > 0.999, f"GPU differs from CPU for DSM {seed}: stale input?"
+
+
+def test_fingerprint_is_quiet_and_sensitive():
+    import warnings
+    a = city(3)
+    a[0, 0] = np.nan
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")                 # no RuntimeWarning may escape
+        f1 = solweig_rs._fingerprint(a)
+        b = a.copy()
+        b[150, 150] += 0.5
+        f2 = solweig_rs._fingerprint(b)
+    assert all(np.isfinite(v) for v in f1[1:]) and f1 != f2
