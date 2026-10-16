@@ -34,10 +34,17 @@ def _julian_day(dt_utc: datetime) -> float:
     return dt_utc.timestamp() / 86400.0 + 2440587.5
 
 
-def solar_position(when: datetime, lat: float, lon: float) -> SunPosition:
+def declination_eot(when: datetime) -> tuple[float, float]:
+    """Solar declination (deg) and equation of time (minutes) at a timezone-aware instant (NOAA).
+
+    The sun's path across the sky on a given day depends only on the declination (for a fixed site); the
+    equation of time shifts that path in clock time."""
     if when.tzinfo is None:
         raise ValueError("timestamp must be timezone-aware")
-    t_utc = when.astimezone(timezone.utc)
+    return _decl_eot(when.astimezone(timezone.utc))
+
+
+def _decl_eot(t_utc: datetime) -> tuple[float, float]:
     jd = _julian_day(t_utc)
     jc = (jd - 2451545.0) / 36525.0
 
@@ -61,6 +68,14 @@ def solar_position(when: datetime, lat: float, lon: float) -> SunPosition:
         y * math.sin(2 * l0r) - 2 * e * math.sin(mr) + 4 * e * y * math.sin(mr) * math.cos(2 * l0r)
         - 0.5 * y * y * math.sin(4 * l0r) - 1.25 * e * e * math.sin(2 * mr)
     )  # minutes
+    return decl, eot
+
+
+def solar_position(when: datetime, lat: float, lon: float) -> SunPosition:
+    if when.tzinfo is None:
+        raise ValueError("timestamp must be timezone-aware")
+    t_utc = when.astimezone(timezone.utc)
+    decl, eot = _decl_eot(t_utc)
 
     minutes_utc = t_utc.hour * 60 + t_utc.minute + t_utc.second / 60 + t_utc.microsecond / 6e7
     true_solar_time = (minutes_utc + eot + 4.0 * lon) % 1440.0
