@@ -56,6 +56,5 @@ python benchmarks/bench_engines.py --size 4000    # seconds per km2 on this mach
 
 ## Provenance
 
-Created 5 October 2026 by Lukas Beuster as a general-purpose tool, independent of any
-client project, and released under the MIT licence. Projects that use it depend on it as
+Created 5 October 2026 by Lukas Beuster as a general-purpose tool, and released under the MIT licence. Projects that use it depend on it as
 a package.
