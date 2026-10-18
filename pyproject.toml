@@ -1,20 +1,38 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "umbrage"
-version = "0.1.0.dev0"
+version = "0.1.0"
 description = "Fast 2.5D shade from raster surface models, on CPU or GPU"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{name = "Lukas Beuster"}]
 requires-python = ">=3.11"
-dependencies = ["numpy"]
+dependencies = ["numpy>=1.24"]
+keywords = ["shade", "shadow", "solar position", "urban climate", "thermal comfort", "DSM", "raster", "GIS"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: GIS",
+]
+
+[project.urls]
+Homepage = "https://github.com/lukasbeuster/umbrage"
+Issues = "https://github.com/lukasbeuster/umbrage/issues"
 
 [project.optional-dependencies]
 torch = ["torch"]                 # Apple MPS / CUDA / multi-threaded CPU
-umep = ["solweig"]                # UMEP Rust backend (GPL-3.0), optional, for cross-checks
+umep = ["solweig"]                # UMEP Rust backend (GPL-3.0), optional, imported only when used
+bench = ["matplotlib"]            # benchmarks/synthetic_estate.py figures
 dev = ["pytest", "pvlib"]
 
 [tool.setuptools.packages.find]

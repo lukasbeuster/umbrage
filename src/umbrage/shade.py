@@ -12,7 +12,7 @@ Layers (all absolute heights in metres, same grid):
 - canopy_top / canopy_base: vegetation crown top and crown base; NaN where no vegetation.
   Light passes through crowns with transmissivity `tau`.
 
-Semantics of the result (differs from UMEP, see docs/semantics.md):
+Semantics of the result (differs from UMEP; see the README, "Inputs and semantics"):
 - `building`: cell is shaded by the dsm
 - `vegetation`: the ray from the cell is intercepted by a crown, regardless of buildings
 - `shade`: 1 where building, else 1 - tau where vegetation, else 0
@@ -65,6 +65,8 @@ def cast_shadows(dsm, res: float, azimuth: float, elevation: float,
     device: None for numpy; "cpu", "mps" or "cuda" for torch.
     max_distance_m: cap on shadow length; default is relief / tan(elevation).
     Obstacles outside the array are invisible: tile with a halo >= max shadow length, then crop.
+    NaN in `dsm` means no data: a NaN cell casts no shadow and is never reported as shaded. Fill
+    nodata (e.g. with terrain) before casting if that is not what you want.
     """
     if elevation <= 0:
         raise ValueError("sun below horizon; handle upstream")

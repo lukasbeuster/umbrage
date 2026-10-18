@@ -1,4 +1,4 @@
-"""Synthetic geometry with known answers. Run: pytest code/tests -q"""
+"""Synthetic geometry with known answers. Run: pytest -q"""
 import math
 import numpy as np
 
@@ -65,3 +65,14 @@ def test_flat_ground_no_shadow():
     z = np.zeros((50, 50), dtype=np.float32)
     r = cast_shadows(z, res=1.0, azimuth=123.0, elevation=30.0)
     assert not r.building.any()
+
+
+def test_nan_cells_cast_nothing_and_are_never_shaded():
+    """NaN = no data: documented behaviour, pinned here."""
+    z = wall_dsm()
+    z[85:95, 90:110] = np.nan            # nodata patch inside the wall's shadow (sun from south)
+    z[140:150, 20:40] = np.nan           # isolated nodata patch on open ground
+    r = cast_shadows(z, res=1.0, azimuth=180.0, elevation=45.0)
+    assert not r.building[85:95, 90:110].any()
+    assert r.building[85:95, 80].all()   # the wall still shades valid cells beside the patch
+    assert not r.building[120:140, 20:40].any(), "a NaN patch must not cast a shadow"
